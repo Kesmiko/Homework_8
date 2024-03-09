@@ -1,5 +1,6 @@
 from Classes import AddressBook, Record
 import datetime as strftime
+import pickle
 
 def input_error(func):
     def inner(*args, **kwargs):
@@ -56,6 +57,17 @@ def change_contact(args, book):
         return "No such name found"
     record.edit_phone(old_phone, new_phone)
     return "Phone changed"
+
+def load_data(filename="addressbook.pkl"):
+    try:
+        with open(filename, "rb") as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return AddressBook()
+    
+def save_data(book, filename="addressbook.pkl"):
+    with open(filename, "wb") as f:
+        pickle.dump(book, f)
         
 @input_error
 def show_birthday(args, book: AddressBook):
@@ -82,7 +94,7 @@ def show_all(args, book):
     return book
 
 def main():
-    book = AddressBook()
+    book = load_data()
     print("Welcome to the assistant bot!")
     commands = ["hello", "add", "change", "phone", "all", "birthdays", "add-birthday", "show-birthday"]
     while True:
@@ -90,6 +102,7 @@ def main():
         command, *args = parse_input(user_input)
 
         if command in ["close", "exit"]:
+            save_data(book)
             print("Good bye!")
             break
         elif command == "hello":
